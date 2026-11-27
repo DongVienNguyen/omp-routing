@@ -1,0 +1,28 @@
+{
+  "daemon": {
+    "agentProfiles": [
+      {
+        "id": "native-vibe-full",
+        "name": "Vibe Routing (Full Access)",
+        "provider": "omp-vibe-ca-nhan",
+        "model": "9router/code-sol",
+        "modeId": "full",
+        "thinkingOptionId": "high"
+      }
+    ]
+  },
+  "agents": {
+    "providers": {
+      "omp-vibe-ca-nhan": {
+        "extends": "omp",
+        "label": "OMP · vibe-ca-nhan",
+        "command": [
+          "<absolute path to omp executable>",
+          "--profile",
+          "vibe-ca-nhan"
+        ],
+        "enabled": true
+      }
+    }
+  }
+}

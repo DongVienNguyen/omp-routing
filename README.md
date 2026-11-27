@@ -4,6 +4,8 @@ Extension cho [Oh My Pi (OMP)](https://github.com/can1357/oh-my-pi), dành cho *
 
 Không có model, provider, khóa API, worker descriptor hay quyền mặc định đi kèm. Nếu chưa có binding và phiên không có checkpoint routing, extension không đổi chat thường. Khi yêu cầu đi qua hook `input`, routing chặn yêu cầu nếu khởi động routing thất bại. Không dựa vào cơ chế này cho mọi client hoặc mọi đường gửi: nếu yêu cầu chỉ đi qua hook dự phòng `before_agent_start`, OMP có thể tiếp tục chat thường sau khi ghi lỗi. Không gửi dữ liệu thật khi có `HOLD` hoặc chưa kiểm tra đường gửi của client bằng dữ liệu mẫu. Dùng profile riêng chưa cấu hình để chủ động tiếp tục chat thường.
 
+Chỉ cần `/vibe` gốc trong OMP TUI hoặc `task` tích hợp trong Paseo Full Access? Dùng [mẫu profile riêng OMP/Paseo](examples/native-vibe/README.md), không cài extension bên dưới.
+
 ## Yêu cầu và mức kiểm chứng
 
 - **OMP bản ổn định từ `19.0.1` trở lên**. Đây là ngưỡng kiểm tra phiên bản, không phải cam kết tương thích với mọi bản mới hơn. Extension dùng API và tool tích hợp của OMP; cấu trúc request, nguồn tool, model thực thi và chính sách quyền vẫn phải khớp.

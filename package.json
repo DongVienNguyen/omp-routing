@@ -6,6 +6,10 @@
   "description": "Personal-profile native OMP routing with explicit model bindings",
   "omp": { "extensions": ["./index.mjs"] },
   "bin": { "routing-config": "./cli.mjs" },
-  "files": ["index.mjs", "runtime/*.mjs", "settings.mjs", "store.mjs", "cli.mjs", "README.md", "CHANGELOG.md"],
+  "files": [
+    "index.mjs", "runtime/*.mjs", "settings.mjs", "store.mjs", "cli.mjs", "README.md", "CHANGELOG.md",
+    "examples/native-vibe/README.md", "examples/native-vibe/omp-config.example.yml",
+    "examples/native-vibe/omp-models.example.yml", "examples/native-vibe/paseo-config.example.json"
+  ],
   "engines": { "node": ">=22" }
 }

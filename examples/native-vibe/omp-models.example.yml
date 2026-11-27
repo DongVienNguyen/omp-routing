@@ -1,0 +1,26 @@
+providers:
+  9router:
+    baseUrl: https://example.invalid/v1
+    api: openai-completions
+    auth: apiKey
+    authHeader: true
+    apiKey: VIBE_9ROUTER_API_KEY
+    models:
+      - id: code-astra
+        name: code-astra
+        reasoning: true
+        thinking:
+          mode: effort
+          efforts: [medium, high]
+      - id: code-seek
+        name: code-seek
+        reasoning: true
+        thinking:
+          mode: effort
+          efforts: [low, medium, high]
+      - id: code-sol
+        name: code-sol
+        reasoning: true
+        thinking:
+          mode: effort
+          efforts: [low, medium, high]

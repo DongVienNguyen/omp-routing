@@ -1,0 +1,6 @@
+modelRoles:
+  default: 9router/code-astra
+  smol: 9router/code-seek:high
+  task: 9router/code-sol:high
+tools:
+  approvalMode: yolo

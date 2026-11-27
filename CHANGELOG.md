@@ -2,6 +2,7 @@
 
 ## Chưa phát hành
 
+- Thêm [mẫu profile riêng](examples/native-vibe/README.md) cho OMP `/vibe` gốc và Paseo Full Access; không thay đổi extension.
 - Chấp nhận OMP bản ổn định từ 19.0.1; kiểm tra API, công cụ và quyền của OMP vẫn áp dụng. Đây không phải cam kết tương thích với mọi bản mới hơn.
 - Kiểm tra phiên bản OMP trước khi khôi phục checkpoint. Khi chạy `/routing resume`, kiểm tra lại binding đã lưu theo quyền hiện hành. Hook lồng nhau không được xác lập hoặc kết thúc lời gọi thuộc phiên điều phối.
 - Tạm dừng attempt khi OMP từ chối `task`, kể cả khi không trả `tool_result`. Lỗi kết thúc khớp lời gọi cũng có thể làm attempt tạm dừng dù chưa có job nền. Extension không cấp quyền hay tự gọi lại.
