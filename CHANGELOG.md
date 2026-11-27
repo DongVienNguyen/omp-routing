@@ -1,10 +1,12 @@
 # Lịch sử thay đổi
 
-## Chưa phát hành
+## 0.1.4
 
 - Chấp nhận OMP bản ổn định từ 19.0.1; kiểm tra API, công cụ và quyền của OMP vẫn áp dụng. Đây không phải cam kết tương thích với mọi bản mới hơn.
 - Kiểm tra phiên bản OMP trước khi khôi phục checkpoint. Khi chạy `/routing resume`, kiểm tra lại binding đã lưu theo quyền hiện hành. Hook lồng nhau không được xác lập hoặc kết thúc lời gọi thuộc phiên điều phối.
 - Tạm dừng attempt khi OMP từ chối `task`, kể cả khi không trả `tool_result`. Lỗi kết thúc khớp lời gọi cũng có thể làm attempt tạm dừng dù chưa có job nền. Extension không cấp quyền hay tự gọi lại.
+- Bổ sung hướng dẫn OMP 19.2.1 và Paseo Desktop với **Always ask**, cách tắt/khôi phục `tools.intentTracing` theo profile và giới hạn của lần thử thực tế trên mã extension 0.1.3 đã cài.
+- Cung cấp gói `.tgz` tải từ GitHub với danh sách tệp cố định và SHA-256 đối chiếu. Bản này không thêm thay đổi vào mã chạy trên GitHub `main`.
 
 ## 0.1.3
 

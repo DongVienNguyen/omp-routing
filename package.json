@@ -1,11 +1,14 @@
 {
   "name": "@personal/omp-portable-routing",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "type": "module",
   "description": "Personal-profile native OMP routing with explicit model bindings",
   "omp": { "extensions": ["./index.mjs"] },
   "bin": { "routing-config": "./cli.mjs" },
-  "files": ["index.mjs", "runtime/*.mjs", "settings.mjs", "store.mjs", "cli.mjs", "README.md", "CHANGELOG.md"],
+  "files": [
+    "index.mjs", "runtime/supervised-lifecycle.mjs", "runtime/supervised-state.mjs",
+    "settings.mjs", "store.mjs", "cli.mjs", "README.md", "CHANGELOG.md"
+  ],
   "engines": { "node": ">=22" }
 }

@@ -9,10 +9,13 @@ Không có model, provider, khóa API, worker descriptor hay quyền mặc đị
 - **OMP bản ổn định từ `19.0.1` trở lên**. Đây là ngưỡng kiểm tra phiên bản, không phải cam kết tương thích với mọi bản mới hơn. Extension dùng API và tool tích hợp của OMP; cấu trúc request, nguồn tool, model thực thi và chính sách quyền vẫn phải khớp.
 - **Node.js 22 trở lên** để chạy CLI ngoại tuyến. Extension chạy bên trong OMP; không chạy `node index.mjs` để cài hay khởi động nó.
 - **Đã kiểm trên Windows:** kịch bản từ chối `task` ở cổng duyệt tích hợp chạy trên OMP **19.0.1** và **19.1.0** trong môi trường cô lập, không tạo worker hay dispatch lần hai. `/routing-doctor` đã được kiểm riêng trên **19.1.0**. Đây không phải bài thử suy luận thật cho mọi provider, mọi client hoặc mọi hệ điều hành.
+- **Đã thử luồng chạy thật trên Windows với OMP 19.2.1**: bản extension **0.1.3 đã cài** giao đúng một việc cho worker và trả kết quả về phiên chính trong TUI thông thường và Paseo Desktop. Cả hai chạy với `tools.intentTracing: false`. Lần thử TUI không quan sát thấy hộp thoại duyệt chặn; lần thử Paseo có quan sát thấy cổng **Always ask**. Mã `.mjs` trong bản 0.1.4 không đổi về nội dung; các kết quả trên không phải lần chạy lại từ gói tải xuống. Phạm vi kiểm tra chỉ là một yêu cầu đọc dữ liệu mẫu, không phải mọi provider, client hay thao tác.
 
-## Cài từ GitHub
+## Bắt đầu: cài vào một profile riêng
 
-Gói nguồn có tên `@personal/omp-portable-routing`. Trường `private: true` trong [manifest](package.json) ngăn xuất bản npm; không dùng `npm install` theo tên gói, `npx` hoặc `latest`. Chọn commit hoặc bản phát hành bạn tin cậy và kiểm tra nội dung trước khi nạp. Nếu tải gói nén có công bố SHA-256, đối chiếu digest từ kênh tin cậy trước khi giải nén. Không coi một checksum tự tính là bằng chứng nguồn gốc.
+Chọn một bản tin cậy từ [GitHub Releases](https://github.com/DongVienNguyen/omp-routing/releases) hoặc clone repo và chọn commit đã rà soát. Với gói `.tgz`, đối chiếu SHA-256 công bố cho đúng tên tệp (`Get-FileHash <tệp.tgz> -Algorithm SHA256` trong PowerShell, `shasum -a 256 <tệp.tgz>` trong shell có `shasum`). Giải nén vào thư mục trống và dùng thư mục `package/` chứa `package.json` làm nguồn cài. Không coi checksum tự tính là bằng chứng nguồn gốc.
+
+Gói `@personal/omp-portable-routing` đặt `private: true` trong [manifest](package.json), không phát hành qua npm. Không cài bằng tên gói, `npx` hay `latest`.
 
 Cài **một** bản trong profile riêng. Hai ví dụ sau dùng `routing-demo` làm tên profile minh họa; đổi thành tên bạn chọn. Chạy `git clone` trong thư mục bạn muốn giữ mã nguồn lâu dài. `plugin link` trỏ vào thư mục đó, không sao chép gói: sau khi rà soát bản muốn dùng, giữ nguyên đường dẫn và nội dung khi còn phiên mở. OMP có thể xóa đích cùng tên khi link. Kiểm tra `plugin list` trong đúng profile **trước** khi link; nếu thấy `@personal/omp-portable-routing` đã có, hoặc OMP đang nạp bridge `runtime-routing.*`, dừng để đối chiếu nguồn đang dùng. Không ghi đè hay nạp song song.
 
@@ -54,18 +57,44 @@ omp --profile "$profile_name" plugin link "$package_dir" &&
 
 Nếu một bước lỗi, dừng và kiểm tra; không tiếp tục trên thư mục hoặc profile khác. Xem [cơ chế `plugin link` của OMP](https://github.com/can1357/oh-my-pi/blob/f40f335845f0b136453d12fec8d6057011082766/docs/plugin-manager-installer-plumbing.md#link-flow-pluginmanagerlink).
 
+Nếu dùng bản `.tgz` thay cho bản clone, bỏ bước clone và vào thư mục `package/` đã giải nén trước khi chạy `plugin list` và `plugin link` như trên. Giữ thư mục nguồn cho đến khi gỡ liên kết.
+
 **Cách khác, không dùng `plugin link`:** đặt gói đã kiểm tra trong `<agent-dir>/extensions/omp-portable-routing/`. Bên trong thư mục gói phải có `package.json`, `index.mjs`, `settings.mjs`, `store.mjs` và `runtime/`; giữ `cli.mjs` nếu cần cấu hình ngoại tuyến. Không đặt cả lần cài native lẫn lần cài qua plugin trong vùng OMP có thể nạp. Mở phiên mới sau khi cài. Xem [quy tắc nạp extension](https://github.com/can1357/oh-my-pi/blob/f40f335845f0b136453d12fec8d6057011082766/docs/extension-loading.md).
 
 `<agent-dir>` là **thư mục agent của profile đang dùng**, không phải thư mục repo, thư mục `extensions` hay mặc định của profile khác. Với bố cục OMP mặc định và profile có tên, nó nằm ở `$HOME/.omp/profiles/<tên-profile>/agent` (Windows: `$HOME\.omp\profiles\<tên-profile>\agent`). Root tùy chỉnh hoặc XDG có thể đổi vị trí. Dùng `omp --profile routing-demo config path` để kiểm tra vị trí cấu hình OMP; sau khi nạp extension, `/routing-doctor` cho biết đường dẫn profile hoặc file binding thực tế. Không suy ra đường dẫn chỉ từ ví dụ. Xem [profile OMP](https://github.com/can1357/oh-my-pi/blob/f40f335845f0b136453d12fec8d6057011082766/docs/config-usage.md#profiles).
 
-## Cấu hình và chạy lần đầu
+## Chạy OMP 19.2.1 trong terminal
 
-1. Từ thư mục dự án muốn làm việc, mở một phiên TUI mới với `omp --profile routing-demo` (đổi tên cho đúng). Nếu OMP chưa có model, thiết lập nhà cung cấp qua OMP, không qua routing. Có thể xem danh mục với `omp --profile routing-demo models`. Xem [model/role](https://github.com/can1357/oh-my-pi/blob/f40f335845f0b136453d12fec8d6057011082766/docs/models.md) và [xác thực nhà cung cấp](https://github.com/can1357/oh-my-pi/blob/f40f335845f0b136453d12fec8d6057011082766/docs/providers.md) của OMP.
-2. Gõ `/routing-setup` khi phiên chính đang rảnh và chưa có luồng routing đang dở. Chọn một model chung hoặc chọn riêng `planner`, `executor`, `worker` trong catalog phiên này. Có thể tham khảo role như `@plan`, nhưng phải xác nhận model cụ thể đã phân giải; không lưu alias, fallback hay effort của role tham khảo. Chọn effort được OMP công bố cho model hoặc **Để OMP chọn**; bỏ effort không có nghĩa là tắt suy luận hay khóa mức suy luận. Chọn đúng descriptor được khám phá, còn bật và không trùng tên. Đọc lại đường dẫn, model và revision trước khi lưu. Hủy hoặc hết thời gian chờ thì không lưu.
-3. Mở một phiên mới tại đúng dự án với cùng profile. Chạy `/routing-doctor`. Doctor không gọi model; nó báo đường dẫn, binding/revision và kiểm tra catalog cùng điều kiện quyền hiện tại. Doctor đạt không bảo đảm tool `task` còn bật tại thời điểm chạy, nhà cung cấp sẵn sàng, tài khoản có quyền, quota còn hoặc chi phí nằm trong ngân sách. Khi `HOLD`, không giao việc cho đến khi hiểu và xử lý nguyên nhân.
-4. Gửi yêu cầu bình thường trong phiên chính, không gõ tên tool như lệnh slash. Thử trước với yêu cầu nhỏ, chỉ đọc, trên dữ liệu mẫu, chẳng hạn: “Chỉ đọc tệp mẫu và tóm tắt; không sửa, không triển khai. Nêu nguồn bằng chứng và phần chưa kiểm tra.” Routing không cấp quyền chỉ đọc cho worker chỉ vì prompt yêu cầu như vậy; kiểm tra quyền tool thực tế trong OMP.
+1. Kiểm tra `omp --version`. Chạy `omp --profile routing-demo config path` (thay `routing-demo` bằng profile của bạn) và sao lưu riêng `config.yml` của đúng profile nếu đã có. Hợp nhất khóa sau vào `config.yml`; nếu đã có mục `tools:`, chỉ thêm hoặc sửa `intentTracing` trong mục đó:
 
-Paseo hay RPC chỉ là giao diện; binding và quyền thuộc về OMP trên máy chạy daemon. Nếu client không đăng ký lệnh hoặc không hiện menu chọn/xác nhận, đừng gửi `/routing-setup` dưới dạng chat. Dùng TUI hoặc CLI ngoại tuyến trên máy daemon, đúng tài khoản/profile, rồi mở phiên mới. Không coi hỗ trợ TUI là bằng chứng mọi client có cùng giao diện hoặc cơ chế duyệt.
+   ```yaml
+   tools:
+     intentTracing: false
+   ```
+
+   Trong lần thử OMP 19.2.1, cài đặt này giữ schema công cụ `task` ở dạng extension nhận diện được. Nó tắt chú thích ý định sử dụng công cụ trong profile, không tắt phê duyệt hay đổi xác thực, model, effort hoặc chính sách `task`. Mở phiên mới để nhận cấu hình. Muốn hoàn tác, khôi phục giá trị cũ; nếu trước đó không có khóa này, xóa riêng `intentTracing` (và `tools:` nếu mục đó trống), rồi mở phiên mới.
+2. Từ thư mục thử chỉ chứa dữ liệu mẫu, mở TUI thông thường bằng `omp --profile routing-demo`, không cần `/vibe` hay cờ bỏ duyệt. Chọn model và worker bằng `/routing-setup` khi phiên rảnh. Có thể dùng cùng model cho ba vai; xác nhận model cụ thể trong catalog, effort nếu cần và tên descriptor trước khi lưu. Nếu OMP chưa thấy model, xem [cấu hình model](https://github.com/can1357/oh-my-pi/blob/f40f335845f0b136453d12fec8d6057011082766/docs/models.md) và [xác thực nhà cung cấp](https://github.com/can1357/oh-my-pi/blob/f40f335845f0b136453d12fec8d6057011082766/docs/providers.md). Nếu provider cần khóa API, dùng biến môi trường theo hướng dẫn provider; không đưa giá trị khóa vào binding, cấu hình ví dụ hay prompt.
+3. Mở phiên mới với cùng profile và chạy `/routing-doctor`. Lệnh không gọi model; `HOLD` nghĩa là cần xử lý nguyên nhân trước khi giao việc. Doctor đạt không bảo đảm công cụ, provider, tài khoản hay quota sẽ sẵn sàng khi chạy.
+4. Gửi yêu cầu như bình thường, ví dụ: “Giao cho đúng một worker đọc `mau.txt` và trả lại nguyên văn. Không sửa tệp hay chạy lệnh.” Tạo tệp mẫu với nội dung tự chọn và không chép nội dung vào prompt. Đối chiếu việc giao cho worker và kết quả ở phiên chính; chỉ thử với dữ liệu vô hại. Prompt không thiết lập quyền chỉ đọc; xem [quyền OMP tích hợp](#quyền-omp-tích-hợp).
+
+## Chạy trong Paseo Desktop
+
+1. Dùng cùng bản OMP, profile và binding trên **máy chạy daemon Paseo**. Cấu hình trước bằng TUI như trên hoặc dùng [CLI ngoại tuyến](#cli-cấu-hình-ngoại-tuyến) nếu giao diện không hiện `/routing-setup`. Nếu provider cần biến môi trường để xác thực, tiến trình daemon phải nhận được biến đó; đặt ở terminal khác không cập nhật daemon đang chạy.
+2. Nếu chưa có provider trỏ đúng profile, sao lưu cấu hình daemon (mặc định `$HOME/.paseo/config.json`), rồi thêm mục dưới đây vào map `agents.providers`, không thay toàn bộ map hoặc provider mặc định. Đổi alias nếu trùng; thay phần tử đầu của `command` bằng đường dẫn tuyệt đối tới executable OMP trên máy daemon và `routing-demo` bằng tên profile của bạn. Escape dấu `\` theo cú pháp JSON trên Windows. Đừng gắn cờ chế độ RPC, cờ bỏ duyệt hoặc cờ ép model/effort; Paseo thiết lập chế độ RPC và quyền từ phiên mới.
+
+   ```json
+   "omp-routing-demo": {
+     "extends": "omp",
+     "label": "OMP Routing Demo",
+     "command": ["<đường dẫn tuyệt đối tới OMP>", "--profile", "routing-demo"],
+     "enabled": true
+   }
+   ```
+
+3. Nếu vừa đổi cấu hình hoặc môi trường, dừng công việc đang chạy và khởi động lại daemon. Trong **New Agent**, chọn thư mục thử, provider **OMP Routing Demo** (hoặc nhãn đã đặt), rồi chọn **Always ask** ở phần quyền. Không chọn **Full Access**. Gửi yêu cầu mẫu ở trên một lần.
+4. Đọc nội dung cổng **Always ask** trước khi quyết định. Nếu phạm vi đúng và bạn đồng ý chạy đúng lời gọi đó, chọn nút duyệt một lần, không chọn cấp quyền cho cả phiên; nếu sai, chọn **Deny**. Không tự động chấp thuận hộp thoại an toàn của provider. Cổng `task` duyệt lời gọi giao việc đã hiện, không duyệt cả kế hoạch, mọi lời gọi sau này hay giới hạn worker trong sandbox. `/routing approve` là lựa chọn khác, dành cho quyết định của kế hoạch.
+
+Trong lần thử thông thường trên Desktop, cổng giao một việc hiện trước khi worker hoàn tất; phiên chính sau đó nhận đúng kết quả. Nhật ký đối chiếu xác nhận cổng được giải quyết, nhưng không xác nhận ai đã duyệt hay đã chọn quyền một lần hay cả phiên. Người quan sát không bấm duyệt. Không dùng kết quả này để suy ra mọi `task` đều hỏi, các tool của worker đều bị chặn, hay đã kiểm chứng quyền cấp cho cả phiên.
 
 ### Quyền OMP tích hợp
 
@@ -184,7 +213,7 @@ File thực tế: `<agent-dir>/routing/model-bindings.v1.json`. Mỗi lần lưu
 | `MODEL_UNAVAILABLE_OR_AMBIGUOUS_*`, `UNSUPPORTED_OR_UNVERIFIED_EFFORT_*`, lỗi worker descriptor | Chạy lại setup với lựa chọn catalog của đúng profile và dự án; kiểm provider, model/effort và descriptor còn khả dụng, duy nhất và không bị tắt. Không sửa binding trong attempt đang chạy. |
 | `STOCK_TASK_PER_CALL_MODEL_NOT_ENABLED`, `WORKER_MODEL_NOT_APPROVED_BY_STOCK`, `NATIVE_TOOL_UNAVAILABLE` | Kiểm chính sách operator, descriptor và tool `task`/`wait` tích hợp đúng ngữ cảnh. Không bỏ duyệt, cài tool cùng tên để thay thế hay tự nới quyền. |
 | `STOCK_AGENT_MODEL_OVERRIDE_CONFLICT`, `STOCK_RETRY_MODEL_FALLBACK_CONFIGURED`, `STOCK_CONTEXT_PROMOTION_CONFIGURED`, `STOCK_ALTERNATE_COMPACTION_MODEL_CONFIGURED` | Binding cố định không tương thích với override của worker, chuỗi fallback model đang bật hoặc chuyển model do context promotion/compaction. Đối chiếu [kiểm tra preflight](settings.mjs) và phối hợp operator dùng profile phù hợp; không âm thầm đổi model hay chính sách. |
-| `ROUTING_NATIVE_TASK_SCHEMA_UNAVAILABLE`, `ROUTING_BOUND_TEMPLATE_NOT_PRESENTED`, `ROUTING_BOUND_TEMPLATE_MISMATCH` | Kiểm OMP/provider có dạng schema được extension nhận diện và executor dùng nguyên mẫu ở request kế tiếp. Không chỉnh thủ công đối số, cấp quyền thêm hay thử dispatch lại khi attempt chưa được đối chiếu. |
+| `ROUTING_NATIVE_TASK_SCHEMA_UNAVAILABLE`, `ROUTING_BOUND_TEMPLATE_NOT_PRESENTED`, `ROUTING_BOUND_TEMPLATE_MISMATCH` | Trên OMP 19.2.1, kiểm tra `tools.intentTracing: false` trong đúng profile và thử ở phiên mới sau khi đã đối chiếu attempt. Kiểm schema của OMP/provider và việc executor dùng nguyên mẫu ở request kế tiếp. Không chỉnh thủ công đối số, nới quyền hay dispatch lại khi attempt chưa được đối chiếu. |
 | `UNRESOLVED_CHECKPOINT`, checkpoint không hợp lệ/khác phiên/khác phiên bản, ghi checkpoint không rõ kết quả | Dừng. Giữ nhật ký riêng và kiểm tác dụng thực tế trước khi làm tiếp. Extension không tự di trú hoặc replay checkpoint cũ, không cung cấp khôi phục worker tách rời. Không sửa tay checkpoint hoặc dùng cơ chế tự chạy lại của host để vượt `HOLD`. |
 | `STALE_BINDINGS_REVISION`, `BINDINGS_DRIFT`, đường dẫn/tệp không an toàn | Đọc lại đúng agent dir và revision; đối chiếu bản sao. Dùng đường dẫn vật lý, không qua symlink/junction; không ép ghi lên dữ liệu đã thay đổi. |
 
@@ -195,6 +224,7 @@ File thực tế: `<agent-dir>/routing/model-bindings.v1.json`. Mỗi lần lưu
 1. Ngừng nhận việc mới; đối chiếu worker/attempt chưa xong và tác dụng thực tế. Đóng các phiên OMP dùng gói trước khi sửa file. Sao lưu riêng binding, revision, bản gói đã kiểm và checkpoint nếu cần điều tra. Không chép credential/phiên/checkpoint sang máy khác.
 2. Nếu cài bằng `plugin link`, chạy `omp --profile routing-demo plugin uninstall '@personal/omp-portable-routing'` ở **đúng profile** (thay tên minh họa). Nếu cài native, đối chiếu toàn bộ thư mục gói với bản đã cài, rồi di chuyển **chỉ thư mục gói** ra khỏi vùng discovery. Nếu thấy tệp lạ hoặc nội dung đổi, dừng để đối chiếu. Không xóa profile hay thư mục dữ liệu chung.
 3. Nếu quay về bản trước, cài duy nhất bản đã kiểm bằng cách tương ứng và mở phiên sạch. Muốn quay lại lựa chọn model cũ, dùng setup hoặc lấy phần `roles` và `workerAgent` từ bản sao đã xác minh để tạo draft rồi áp dụng với **revision hiện tại**. Chỉ đọc checkpoint cũ bằng đúng bản phù hợp trong ngữ cảnh lưu trữ của nó; không trộn state giữa các bản hay gắn sang phiên khác. Kiểm lại bằng `/routing-doctor` sau khi cài lại. Gỡ/cài lại hoặc khôi phục file không hoàn tác lời gọi model, chi phí, thay đổi repo hay việc worker đã làm.
+4. Nếu đã thêm provider Paseo cho riêng bản cài này, bỏ đúng mục đó hoặc khôi phục cấu hình sao lưu nếu chưa có thay đổi khác; khởi động lại daemon khi không còn việc đang chạy. Khôi phục `tools.intentTracing` theo bước TUI nếu không còn cần cấu hình đó.
 
 ## Bảo mật và giới hạn
 
